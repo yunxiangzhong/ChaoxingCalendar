@@ -93,7 +93,6 @@ def auto_login(driver):
     except Exception as e: input(">>> 手动登录后回车...")
 
 def main():
-    # === 【这里是本次优化的核心代码】 ===
     edge_options = webdriver.EdgeOptions()
     # 策略设置为 eager：DOM加载完就认为好了，不等图片和烂七八糟的脚本
     edge_options.page_load_strategy = 'eager' 
