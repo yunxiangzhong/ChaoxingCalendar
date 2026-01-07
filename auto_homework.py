@@ -103,7 +103,6 @@ def main():
     # 如果15秒还在转圈，直接抛出异常，我们在下面捕获它并继续执行，不再死等
     driver.set_page_load_timeout(15) 
     driver.implicitly_wait(2)
-    # =================================
 
     auto_login(driver)
 
