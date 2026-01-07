@@ -1,6 +1,18 @@
 # 基础自动化库
-selenium
-webdriver-manager
-# 如果你的代码里有以下库，请保留，没有则删掉
-requests
-beautifulsoup4
+selenium>=4.0.0
+webdriver-manager>=3.8.0
+
+# 其他依赖
+# 注意：程序使用了内置库，无需额外安装
+# - os
+# - sys
+# - time
+# - re
+# - json
+# - datetime
+# - hashlib
+# - webbrowser
+# - winreg (仅Windows)
+
+# 打包工具 (可选)
+# pyinstaller>=5.0.0

@@ -25,7 +25,11 @@ else:
 driver_path = os.path.join(base_path, "msedgedriver.exe")
 # ===========================================
 
+# 使用手动指定的驱动
+print(f">>> 使用手动驱动: {driver_path}")
+
 SERVICE = Service(driver_path) 
+
 #输入最大课程的数量（一般只需要爬本学期的课程
 MAX_COURSES_COUNT = 10 
 
@@ -35,6 +39,35 @@ PASSWORD = "xxx"
 # ===========================================
 
 # --- 辅助函数 ---
+def register_protocol():
+    import winreg
+    import os
+    protocol_name = "cxcalendar"
+    try:
+        # 获取当前可执行文件的完整路径
+        if getattr(sys, 'frozen', False):
+            # 打包后的exe文件
+            exe_path = sys.executable
+        else:
+            base_path = os.path.dirname(os.path.abspath(__file__))
+            exe_path = os.path.join(base_path, "dist", "auto_homework.exe")
+        
+        # 创建协议注册表项
+        key_path = f"Software\\Classes\\{protocol_name}"
+        with winreg.CreateKey(winreg.HKEY_CURRENT_USER, key_path) as key:
+            winreg.SetValue(key, "", winreg.REG_SZ, f"URL:{protocol_name} Protocol")
+            winreg.SetValueEx(key, "URL Protocol", 0, winreg.REG_SZ, "")
+        
+        # 创建shell\open\command项
+        command_path = f"{key_path}\\shell\\open\\command"
+        with winreg.CreateKey(winreg.HKEY_CURRENT_USER, command_path) as key:
+            # 确保路径使用双引号包围，处理包含空格的路径
+            winreg.SetValue(key, "", winreg.REG_SZ, f'"{exe_path}" "%1"')
+        
+        return True
+    except Exception as e:
+        return False
+
 def generate_task_id(course, title, time_str):
     raw_str = f"{course}_{title}_{time_str}"
     return hashlib.md5(raw_str.encode('utf-8')).hexdigest()
@@ -93,6 +126,9 @@ def auto_login(driver):
     except Exception as e: input(">>> 手动登录后回车...")
 
 def main():
+    # 注册自定义协议
+    register_protocol()
+    
     edge_options = webdriver.EdgeOptions()
     # 策略设置为 eager：DOM加载完就认为好了，不等图片和烂七八糟的脚本
     edge_options.page_load_strategy = 'eager' 
@@ -484,5 +520,17 @@ def main():
     time.sleep(3)
     sys.exit()
 
+import traceback
+
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except Exception as e:
+        # 输出详细的错误信息到文件
+        error_log = os.path.join(base_path, "error.log")
+        with open(error_log, "w", encoding="utf-8") as f:
+            f.write(f"Error type: {type(e).__name__}\n")
+            f.write(f"Error message: {e}\n")
+            f.write(f"Traceback:\n{traceback.format_exc()}\n")
+        # 显示错误信息
+        input(f"程序执行出错！详细信息已保存到 {error_log}\n错误信息: {e}\n按回车键退出...")
