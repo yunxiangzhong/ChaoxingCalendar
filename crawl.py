@@ -30,8 +30,8 @@ else:
 
 MAX_COURSES_COUNT = 4 
 
-USERNAME = "xxx" 
-PASSWORD = "xxx"
+USERNAME = "19914770930" 
+PASSWORD = "Zyx1727236047@"
 
 # --- 辅助函数 ---
 def register_protocol():
@@ -48,7 +48,7 @@ def register_protocol():
             # 协议应该指向最终的exe文件路径，而不是python脚本
             # 所以我们需要手动指定exe文件的路径
             base_path = os.path.dirname(os.path.abspath(__file__))
-            exe_path = os.path.join(base_path, "dist", "auto_homework.exe")
+            exe_path = os.path.join(base_path, "dist", "crawl.exe")
         
         # 创建协议注册表项
         key_path = f"Software\\Classes\\{protocol_name}"
@@ -136,8 +136,35 @@ def crawl_tasks():
     # 配置 Edge 浏览器
     edge_options = webdriver.EdgeOptions()
     edge_options.page_load_strategy = 'eager' 
+    # 添加更多配置选项
+    # 移除无头模式，以便用户可以手动登录
+    # edge_options.add_argument('--headless')  # 无头模式
+    edge_options.add_argument('--disable-gpu')  # 禁用GPU
+    edge_options.add_argument('--no-sandbox')  # 禁用沙箱
+    edge_options.add_argument('--disable-dev-shm-usage')  # 禁用开发者共享内存
+    edge_options.add_argument('--disable-extensions')  # 禁用扩展
     
-    driver = webdriver.Edge(service=SERVICE, options=edge_options)
+    print(f">>> 正在初始化 Edge WebDriver...")
+    print(f">>> 驱动路径: {driver_path if os.path.exists(driver_path) else '系统默认'}")
+    
+    # 强制绕过本地代理，避免 Bad Gateway 错误
+    os.environ['no_proxy'] = 'localhost,127.0.0.1'
+    
+    try:
+        driver = webdriver.Edge(service=SERVICE, options=edge_options)
+        print(">>> Edge WebDriver 初始化成功！")
+    except Exception as e:
+        print(f">>> Edge WebDriver 初始化失败: {e}")
+        # 尝试使用系统默认驱动
+        print(">>> 尝试使用系统默认驱动...")
+        try:
+            # 确保系统默认驱动也绕过本地代理
+            os.environ['no_proxy'] = 'localhost,127.0.0.1'
+            driver = webdriver.Edge(options=edge_options)
+            print(">>> 系统默认驱动初始化成功！")
+        except Exception as e2:
+            print(f">>> 系统默认驱动初始化也失败: {e2}")
+            raise
     
     # 设置页面加载超时时间为 15秒
     driver.set_page_load_timeout(15) 
