@@ -1,6 +1,4 @@
 from flask import Flask, Response
-import sys
-import os
 import json
 import datetime
 
@@ -20,206 +18,419 @@ def get_html(tasks=[]):
 <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
 <style>
     :root {{
-        --bg-gradient: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 50%, #e2e8f0 100%);
-        --accent: #0071E3;
-        --accent-hover: #0077ED;
-        --accent-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        --glass-bg: rgba(255, 255, 255, 0.7);
-        --glass-border: rgba(255, 255, 255, 0.6);
-        --text-primary: #1e293b;
-        --text-secondary: #64748b;
-        --success: #10b981;
-        --warning: #f59e0b;
-        --border: rgba(226, 232, 240, 0.8);
-        --shadow-sm: 0 1px 3px rgba(0,0,0,0.04);
-        --shadow-md: 0 4px 16px rgba(0,0,0,0.06);
-        --shadow-lg: 0 8px 32px rgba(0,0,0,0.08);
-        --radius-sm: 8px;
-        --radius-md: 12px;
-        --radius-lg: 16px;
-        --radius-xl: 24px;
-        --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        --bg: #FAF9F7;
+        --surface: #FFFFFF;
+        --surface-hover: #F5F4F2;
+        --text-primary: #2D2D2D;
+        --text-secondary: #888888;
+        --text-muted: #BBBBBB;
+        --border: #E5E5E5;
+        --border-light: #EFEFEF;
+        --accent-auto: #7A6855;
+        --accent-manual: #A08040;
+        --accent-done: #7A9B82;
+        --accent-action: #2D2D2D;
+        --shadow-xs: 0 1px 2px rgba(0,0,0,0.04);
+        --shadow-sm: 0 2px 8px rgba(0,0,0,0.06);
+        --shadow-md: 0 4px 20px rgba(0,0,0,0.07);
+        --radius-sm: 6px;
+        --radius-md: 10px;
+        --radius-lg: 14px;
+        --radius-xl: 20px;
+        --transition: all 0.2s ease;
     }}
 
     * {{ margin: 0; padding: 0; box-sizing: border-box; }}
 
     body {{
-        font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
-        background: var(--bg-gradient);
-        background-attachment: fixed;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+        background: var(--bg);
         color: var(--text-primary);
         min-height: 100vh;
-        padding: 48px 24px;
+        padding: 48px 24px 120px;
         line-height: 1.6;
-        position: relative;
-        overflow-x: hidden;
-    }}
-
-    body::before, body::after {{
-        content: '';
-        position: fixed;
-        border-radius: 50%;
-        pointer-events: none;
-        z-index: -1;
-    }}
-
-    body::before {{
-        top: -20%;
-        left: -10%;
-        width: 80vw;
-        height: 80vw;
-        max-width: 600px;
-        max-height: 600px;
-        background: radial-gradient(circle, rgba(102, 126, 234, 0.18) 0%, rgba(118, 75, 162, 0.1) 40%, transparent 70%);
-        animation: float 20s ease-in-out infinite;
-    }}
-
-    body::after {{
-        bottom: -10%;
-        right: -5%;
-        width: 60vw;
-        height: 60vw;
-        max-width: 500px;
-        max-height: 500px;
-        background: radial-gradient(circle, rgba(16, 185, 129, 0.12) 0%, rgba(6, 182, 212, 0.08) 40%, transparent 70%);
-        animation: float 15s ease-in-out infinite reverse;
-    }}
-
-    @keyframes float {{
-        0%, 100% {{ transform: translate(0, 0) scale(1); }}
-        33% {{ transform: translate(30px, -30px) scale(1.05); }}
-        66% {{ transform: translate(-20px, 20px) scale(0.95); }}
-    }}
-
-    .noise-overlay {{
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        pointer-events: none;
-        z-index: -1;
-        opacity: 0.03;
-        background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctanes='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
     }}
 
     .container {{
-        max-width: 1100px;
+        max-width: 1080px;
         margin: 0 auto;
     }}
 
     .header {{
-        margin-bottom: 40px;
+        margin-bottom: 36px;
         text-align: center;
     }}
 
     .header h1 {{
-        font-size: 36px;
-        font-weight: 700;
-        letter-spacing: -0.5px;
-        background: var(--accent-gradient);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-        margin-bottom: 8px;
-        display: inline-block;
+        font-size: 30px;
+        font-weight: 600;
+        letter-spacing: -0.3px;
+        color: var(--text-primary);
+        margin-bottom: 6px;
     }}
 
     .header p {{
         color: var(--text-secondary);
-        font-size: 15px;
+        font-size: 14px;
+        font-weight: 400;
     }}
 
     .calendar-wrapper {{
-        background: var(--glass-bg);
-        backdrop-filter: blur(24px);
-        -webkit-backdrop-filter: blur(24px);
-        border: 1px solid var(--glass-border);
+        background: var(--surface);
+        border: 1px solid var(--border);
         border-radius: var(--radius-lg);
-        box-shadow: var(--shadow-lg);
-        padding: 32px;
-        margin-bottom: 120px;
-        transition: var(--transition);
+        box-shadow: var(--shadow-md);
+        padding: 28px;
     }}
 
-    .calendar-wrapper:hover {{
-        box-shadow: 0 12px 48px rgba(0, 0, 0, 0.12);
-        transform: translateY(-2px);
-    }}
-
+    /* FullCalendar overrides */
     .fc {{ font-family: inherit; }}
+
     .fc-toolbar-title {{
-        font-size: 22px !important;
-        font-weight: 700 !important;
+        font-size: 18px !important;
+        font-weight: 600 !important;
         color: var(--text-primary) !important;
     }}
-    .fc-button {{
+
+    .fc-button-primary {{
+        background: var(--surface) !important;
+        border: 1px solid var(--border) !important;
+        color: var(--text-primary) !important;
         border-radius: var(--radius-sm) !important;
-        font-weight: 600 !important;
+        font-weight: 500 !important;
+        font-size: 13px !important;
+        box-shadow: var(--shadow-xs) !important;
+        transition: var(--transition) !important;
+        padding: 5px 12px !important;
     }}
+
+    .fc-button-primary:hover {{
+        background: var(--surface-hover) !important;
+        border-color: #D0D0D0 !important;
+        box-shadow: var(--shadow-sm) !important;
+    }}
+
+    .fc-button-primary:not(:disabled):active,
+    .fc-button-primary:not(:disabled).fc-button-active {{
+        background: var(--text-primary) !important;
+        color: #FFF !important;
+        border-color: var(--text-primary) !important;
+        box-shadow: none !important;
+    }}
+
+    .fc-col-header-cell-cushion {{
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--text-secondary);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        text-decoration: none !important;
+    }}
+
     .fc-daygrid-day-number {{
+        font-size: 13px;
         font-weight: 500;
         color: var(--text-secondary);
+        text-decoration: none !important;
+        padding: 6px 8px !important;
     }}
 
-    .fc-event {{ border: none !important; background: transparent !important; margin-bottom: 6px !important; cursor: pointer; }}
+    .fc-day-today {{
+        background: #F7F3EE !important;
+    }}
 
+    .fc-day-today .fc-daygrid-day-number {{
+        color: var(--accent-auto);
+        font-weight: 700;
+    }}
+
+    .fc-daygrid-day-frame {{
+        min-height: 80px !important;
+    }}
+
+    .fc-scrollgrid {{
+        border-color: var(--border) !important;
+    }}
+
+    .fc-scrollgrid td, .fc-scrollgrid th {{
+        border-color: var(--border-light) !important;
+    }}
+
+    .fc-event {{
+        border: none !important;
+        background: transparent !important;
+        margin-bottom: 3px !important;
+        cursor: pointer;
+    }}
+
+    /* Task cards inside calendar cells */
     .task-card {{
-        background: rgba(255,255,255,0.85);
-        border-radius: var(--radius-md);
-        padding: 14px 16px;
-        margin-bottom: 10px;
-        border-left: 3px solid var(--accent);
+        background: var(--surface);
+        border-radius: var(--radius-sm);
+        padding: 5px 8px;
+        border-left: 3px solid var(--accent-auto);
+        box-shadow: var(--shadow-xs);
+        overflow: hidden;
+        position: relative;
         transition: var(--transition);
+    }}
+    .task-card:hover {{
+        background: var(--surface-hover);
+        box-shadow: var(--shadow-sm);
+    }}
+    .task-card.done {{
+        opacity: 0.55;
+        border-left-color: var(--accent-done);
+    }}
+    .task-card.auto {{ border-left-color: var(--accent-auto); }}
+    .task-card.manual {{ border-left-color: var(--accent-manual); }}
+
+    .task-header {{
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        margin-bottom: 2px;
+        overflow: hidden;
+    }}
+
+    .task-course {{
+        font-size: 10px;
+        font-weight: 600;
+        color: var(--text-secondary);
+        letter-spacing: 0.3px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        flex: 1;
+        min-width: 0;
+    }}
+
+    .task-badge {{
+        font-size: 9px;
+        flex-shrink: 0;
+    }}
+
+    .task-title {{
+        font-size: 12px;
+        font-weight: 500;
+        color: var(--text-primary);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        line-height: 1.4;
+    }}
+
+    .task-card.done .task-title {{
+        text-decoration: line-through;
+        color: var(--text-muted);
+    }}
+
+    .task-meta {{
+        font-size: 10px;
+        color: var(--text-muted);
+        margin-top: 2px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }}
+
+    .task-actions {{
+        position: absolute;
+        top: 4px;
+        right: 4px;
+        display: none;
+        gap: 3px;
+        background: var(--surface);
+        border-radius: var(--radius-sm);
+        padding: 2px;
+        box-shadow: var(--shadow-sm);
+    }}
+    .task-card:hover .task-actions {{ display: flex; }}
+
+    .action-btn {{
+        width: 22px;
+        height: 22px;
+        border: none;
+        background: transparent;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 11px;
+        color: var(--text-secondary);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: var(--transition);
+    }}
+    .action-btn:hover {{
+        background: var(--border);
+        color: var(--text-primary);
+    }}
+
+    /* Floating action buttons */
+    .fab-group {{
+        position: fixed;
+        bottom: 32px;
+        right: 32px;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 10px;
+        z-index: 100;
+    }}
+
+    .fab {{
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        border: 1px solid var(--border);
+        background: var(--surface);
+        color: var(--text-primary);
+        font-size: 18px;
+        cursor: pointer;
+        box-shadow: var(--shadow-sm);
+        transition: var(--transition);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-decoration: none;
+    }}
+    .fab:hover {{
+        background: var(--surface-hover);
+        box-shadow: var(--shadow-md);
+        transform: translateY(-1px);
+    }}
+    .fab.main {{
+        width: 52px;
+        height: 52px;
+        font-size: 24px;
+        background: var(--text-primary);
+        color: #FFFFFF;
+        border-color: var(--text-primary);
+    }}
+    .fab.main:hover {{
+        background: #444444;
+    }}
+
+    /* Modal */
+    .modal {{
+        display: none;
+        position: fixed;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background: rgba(0, 0, 0, 0.25);
+        backdrop-filter: blur(4px);
+        -webkit-backdrop-filter: blur(4px);
+        z-index: 1000;
+        justify-content: center;
+        align-items: center;
+    }}
+
+    .modal-content {{
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-xl);
+        width: 420px;
+        max-width: 92vw;
+        padding: 28px;
+        box-shadow: var(--shadow-md);
         position: relative;
     }}
-    .task-card:hover {{ transform: translateY(-2px); box-shadow: var(--shadow-sm); }}
-    .task-card.done {{ opacity: 0.5; border-left-color: var(--success); }}
-    .task-card.auto {{ border-left-color: var(--accent); }}
-    .task-card.manual {{ border-left-color: var(--warning); }}
-    .task-header {{ display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }}
-    .task-status {{ width: 8px; height: 8px; border-radius: 50%; background: var(--accent); }}
-    .task-card.done .task-status {{ background: var(--success); }}
-    .task-course {{ font-size: 12px; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; }}
-    .task-title {{ font-size: 15px; font-weight: 500; color: var(--text-primary); margin-bottom: 8px; line-height: 1.4; }}
-    .task-card.done .task-title {{ text-decoration: line-through; color: var(--text-secondary); }}
-    .task-meta {{ display: flex; gap: 12px; font-size: 13px; color: var(--text-secondary); }}
 
-    .task-actions {{ position: absolute; top: 12px; right: 12px; display: none; gap: 6px; }}
-    .task-card:hover .task-actions {{ display: flex; }}
-    .action-btn {{ width: 28px; height: 28px; border: none; background: rgba(255,255,255,0.9); border-radius: 50%; cursor: pointer; font-size: 14px; color: var(--text-secondary); box-shadow: var(--shadow-sm); }}
-    .action-btn:hover {{ transform: scale(1.1); }}
+    .modal-content h3 {{
+        font-size: 17px;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 22px;
+    }}
 
-    .fab-group {{ position: fixed; bottom: 32px; right: 32px; display: flex; flex-direction: column; align-items: flex-end; gap: 12px; z-index: 100; }}
-    .fab {{ width: 52px; height: 52px; border-radius: 50%; border: none; background: var(--text-primary); color: white; font-size: 22px; cursor: pointer; box-shadow: var(--shadow-lg); transition: var(--transition); display: flex; align-items: center; justify-content: center; text-decoration: none; }}
-    .fab:hover {{ transform: scale(1.05); box-shadow: 0 12px 40px rgba(0,0,0,0.2); }}
-    .fab.main {{ width: 60px; height: 60px; background: var(--accent); }}
+    .form-group {{ margin-bottom: 16px; }}
 
-    .modal {{ display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15, 23, 42, 0.4); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); z-index: 1000; justify-content: center; align-items: center; }}
-    .modal-content {{ background: rgba(255, 255, 255, 0.95); border-radius: var(--radius-xl); width: 440px; max-width: 90vw; padding: 32px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15); position: relative; overflow: hidden; }}
-    .modal-content::before {{ content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px; background: var(--accent-gradient); }}
-    .modal-content h3 {{ font-size: 20px; font-weight: 600; margin-bottom: 24px; }}
-    .form-group {{ margin-bottom: 20px; }}
-    .form-group label {{ display: block; font-size: 13px; font-weight: 500; color: var(--text-secondary); margin-bottom: 8px; }}
-    .form-group input {{ width: 100%; padding: 14px 16px; background: rgba(255, 255, 255, 0.6); border: 1px solid var(--border); border-radius: var(--radius-md); font-size: 15px; transition: var(--transition); color: var(--text-primary); }}
-    .form-group input:focus {{ outline: none; border-color: #667eea; box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.15); }}
-    .modal-btns {{ display: flex; justify-content: flex-end; gap: 12px; margin-top: 32px; }}
-    .modal-btn {{ padding: 12px 24px; border-radius: var(--radius-md); font-size: 14px; font-weight: 600; cursor: pointer; transition: var(--transition); border: none; }}
-    .modal-btn-cancel {{ background: rgba(241, 245, 249, 0.8); color: var(--text-primary); }}
-    .modal-btn-save {{ background: var(--accent-gradient); color: white; box-shadow: 0 4px 16px rgba(102, 126, 234, 0.35); }}
+    .form-group label {{
+        display: block;
+        font-size: 12px;
+        font-weight: 500;
+        color: var(--text-secondary);
+        margin-bottom: 6px;
+        letter-spacing: 0.2px;
+    }}
+
+    .form-group input {{
+        width: 100%;
+        padding: 10px 12px;
+        background: var(--bg);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-md);
+        font-size: 14px;
+        color: var(--text-primary);
+        transition: var(--transition);
+        font-family: inherit;
+    }}
+
+    .form-group input::placeholder {{ color: var(--text-muted); }}
+
+    .form-group input:hover {{
+        border-color: #CCCCCC;
+    }}
+
+    .form-group input:focus {{
+        outline: none;
+        border-color: var(--accent-auto);
+        box-shadow: 0 0 0 3px rgba(122, 104, 85, 0.12);
+        background: var(--surface);
+    }}
+
+    .modal-btns {{
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+        margin-top: 24px;
+    }}
+
+    .modal-btn {{
+        padding: 9px 20px;
+        border-radius: var(--radius-md);
+        font-size: 13px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: var(--transition);
+        border: 1px solid transparent;
+        font-family: inherit;
+    }}
+
+    .modal-btn-cancel {{
+        background: var(--bg);
+        color: var(--text-secondary);
+        border-color: var(--border);
+    }}
+    .modal-btn-cancel:hover {{
+        background: var(--surface-hover);
+        color: var(--text-primary);
+    }}
+
+    .modal-btn-save {{
+        background: var(--text-primary);
+        color: #FFFFFF;
+        border-color: var(--text-primary);
+    }}
+    .modal-btn-save:hover {{
+        background: #444444;
+    }}
 
     @media (max-width: 768px) {{
         body {{ padding: 24px 16px 100px; }}
-        .header h1 {{ font-size: 28px; }}
-        .calendar-wrapper {{ padding: 20px; margin-bottom: 100px; }}
-        .fab-group {{ bottom: 24px; right: 24px; gap: 12px; }}
+        .header h1 {{ font-size: 24px; }}
+        .calendar-wrapper {{ padding: 16px; }}
+        .fab-group {{ bottom: 20px; right: 20px; }}
         .modal {{ align-items: flex-end; }}
-        .modal-content {{ width: 100%; max-width: 100%; border-radius: var(--radius-xl) var(--radius-xl) 0 0; padding: 24px; }}
+        .modal-content {{
+            width: 100%;
+            max-width: 100%;
+            border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+            padding: 22px;
+        }}
     }}
 </style>
 </head>
 <body>
-  <div class="noise-overlay"></div>
   <div class="container">
     <header class="header">
       <h1>学习通任务管理</h1>
@@ -256,7 +467,7 @@ def get_html(tasks=[]):
             <input type="datetime-local" id="mDate">
         </div>
         <div class="form-group">
-            <label>链接 (可选)</label>
+            <label>链接（可选）</label>
             <input type="text" id="mLink" placeholder="https://...">
         </div>
         <div class="modal-btns">
@@ -345,6 +556,11 @@ def get_html(tasks=[]):
           locale: 'zh-cn',
           contentHeight: 'auto',
           dayMaxEvents: false,
+          headerToolbar: {{
+            left: 'prev,next today',
+            center: 'title',
+            right: ''
+          }},
           events: tasks,
           eventContent: function(arg) {{
             let props = arg.event.extendedProps;
@@ -352,33 +568,34 @@ def get_html(tasks=[]):
             let source = props.source || 'auto';
             let id = arg.event.id;
             let url = arg.event.url;
+            let titleText = arg.event.title;
+            let courseText = props.course || '';
 
             let cardClass = 'task-card ' + source + ' ' + status;
-            let icon = status === 'done' ? '✓' : '○';
             let sourceIcon = source === 'manual' ? '✎' : '🔗';
 
-            let actions = '';
-            if (status === 'done')
-                actions = `<span class="action-btn done-btn" onclick="toggleStatus('${{id}}', 'todo', event)" title="标记未完成">↩</span>`;
-            else
-                actions = `<span class="action-btn done-btn" onclick="toggleStatus('${{id}}', 'done', event)" title="标记完成">✓</span>`;
-            if (source === 'manual')
-                actions += `<span class="action-btn" onclick="editTask('${{id}}', event)" title="编辑">✎</span>`;
-            actions += `<span class="action-btn delete-btn" onclick="deleteTask('${{id}}', event)" title="删除">×</span>`;
+            let doneBtn = status === 'done'
+                ? `<button class="action-btn" onclick="toggleStatus('${{id}}', 'todo', event)" title="标记未完成">↩</button>`
+                : `<button class="action-btn" onclick="toggleStatus('${{id}}', 'done', event)" title="标记完成">✓</button>`;
+            let editBtn = source === 'manual'
+                ? `<button class="action-btn" onclick="editTask('${{id}}', event)" title="编辑">✎</button>`
+                : '';
+            let deleteBtn = `<button class="action-btn" onclick="deleteTask('${{id}}', event)" title="删除">×</button>`;
 
-            let html = '<div class="' + cardClass + '">' +
-                '<div class="task-actions">' + actions + '</div>' +
+            let inner =
+                '<div class="task-actions">' + doneBtn + editBtn + deleteBtn + '</div>' +
                 '<div class="task-header">' +
-                '<span class="task-status"></span>' +
-                '<span class="task-course">' + icon + ' ' + props.course + ' ' + sourceIcon + '</span>' +
+                  '<span class="task-course" title="' + courseText + '">' + courseText + '</span>' +
+                  '<span class="task-badge">' + sourceIcon + '</span>' +
                 '</div>' +
-                '<div class="task-title">' + arg.event.title + '</div>' +
-                '<div class="task-meta"><span>⏱ ' + props.deadline_text + '</span></div>' +
-                '</div>';
+                '<div class="task-title" title="' + titleText + '">' + titleText + '</div>' +
+                '<div class="task-meta">' + props.deadline_text + '</div>';
+
+            let card = '<div class="' + cardClass + '" title="' + titleText + '">' + inner + '</div>';
 
             if (url)
-                return {{ html: '<a href="' + url + '" target="_blank" class="task-event" onclick="event.stopPropagation()">' + html + '</a>' }};
-            return {{ html: html }};
+                return {{ html: '<a href="' + url + '" target="_blank" style="text-decoration:none;display:block;" onclick="event.stopPropagation()">' + card + '</a>' }};
+            return {{ html: card }};
           }}
         }});
         calendar.render();
@@ -424,8 +641,12 @@ def get_html(tasks=[]):
         }}
       }}
 
-      function openModal() {{ editingId=null; document.querySelectorAll('#addModal input').forEach(i=>i.value=''); document.getElementById('addModal').style.display='flex'; }}
-      function closeModal() {{ document.getElementById('addModal').style.display='none'; }}
+      function openModal() {{
+        editingId = null;
+        document.querySelectorAll('#addModal input').forEach(i => i.value = '');
+        document.getElementById('addModal').style.display = 'flex';
+      }}
+      function closeModal() {{ document.getElementById('addModal').style.display = 'none'; }}
 
       function saveManualTask() {{
         let course = document.getElementById('mCourse').value.trim() || '自定义';
@@ -455,7 +676,7 @@ def get_html(tasks=[]):
         var db = JSON.parse(localStorage.getItem('chaoxing_db')) || [];
         if(editingId) {{
             let idx = db.findIndex(t => t.id === editingId);
-            if(idx!==-1) db[idx] = newTask;
+            if(idx !== -1) db[idx] = newTask;
         }} else {{
             db.push(newTask);
         }}
@@ -463,6 +684,10 @@ def get_html(tasks=[]):
         closeModal();
         renderCalendar();
       }}
+
+      document.getElementById('addModal').addEventListener('click', function(e) {{
+        if (e.target === this) closeModal();
+      }});
     </script>
 </body>
 </html>'''
